@@ -7,17 +7,16 @@ namespace BankingApplication
     {
         public string BankName { get; private set; }
         public string AccountNumber { get; private set; }
-        public string AccountHolder { get; private set; }
+        public string UserName { get; private set; }
         public decimal Balance { get; private set; }
 
-        // Transaction history list
         private List<string> transactions = new List<string>();
 
-        public BankAccount(string bankName, string accountNumber, string accountHolder, decimal openingBalance)
+        public BankAccount(string bankName, string accountNumber, string userName, decimal openingBalance)
         {
             BankName = bankName;
             AccountNumber = accountNumber;
-            AccountHolder = accountHolder;
+            UserName = userName;
             Balance = openingBalance;
 
             transactions.Add($"Account opened with Rs.{openingBalance:F2} on {DateTime.Now}");
@@ -26,7 +25,7 @@ namespace BankingApplication
         public void ShowAccountDetails()
         {
             Console.WriteLine($"Bank: {BankName}");
-            Console.WriteLine($"Account Holder: {AccountHolder}");
+            Console.WriteLine($"Account Holder: {UserName}");
             Console.WriteLine($"Account Number: {AccountNumber}");
             Console.WriteLine($"Current Balance: Rs.{Balance:F2}");
         }
@@ -86,28 +85,27 @@ namespace BankingApplication
         }
     }
 
+    public class User
+    {
+        public string UserName { get; private set; }
+        public string Password { get; private set; }
+        public BankAccount Account { get; private set; }
+
+        public User(string userName, string password, BankAccount account)
+        {
+            UserName = userName;
+            Password = password;
+            Account = account;
+        }
+    }
+
     internal class Program
     {
+        static List<User> users = new List<User>();
+        static User loggedInUser = null;
+
         static void Main(string[] args)
         {
-            Console.WriteLine("==================================================");
-            Console.WriteLine("        Welcome To Our BOC Banking Portal");
-            Console.WriteLine("==================================================");
-
-            Console.Write("Enter Your Name: ");
-            string accountHolder = Console.ReadLine();
-
-            Console.Write("Enter Opening Balance: ");
-            decimal openingBalance;
-            while (!decimal.TryParse(Console.ReadLine(), out openingBalance) || openingBalance < 0)
-            {
-                Console.WriteLine("Invalid amount. Enter a valid opening balance:");
-            }
-
-            BankAccount myAccount = new BankAccount("BOC", "1234567890", accountHolder, openingBalance);
-
-            Console.WriteLine($"Hello, {accountHolder}! Your account has been created with a balance of Rs.{openingBalance:F2}");
-
             bool running = true;
             while (running)
             {
@@ -115,12 +113,106 @@ namespace BankingApplication
                 Console.WriteLine("==================================================");
                 Console.WriteLine("        Welcome To Our BOC Banking Portal");
                 Console.WriteLine("==================================================");
+                Console.WriteLine("1. Register");
+                Console.WriteLine("2. Login");
+                Console.WriteLine("3. Exit");
+                Console.WriteLine("==================================================");
+                Console.Write("Choose an option: ");
+
+                if (!int.TryParse(Console.ReadLine(), out int choice))
+                {
+                    Console.WriteLine("Invalid choice. Please enter 1–3.");
+                    Pause();
+                    continue;
+                }
+
+                switch (choice)
+                {
+                    case 1:
+                        Register();
+                        break;
+                    case 2:
+                        Login();
+                        if (loggedInUser != null)
+                        {
+                            AccountMenu();
+                        }
+                        break;
+                    case 3:
+                        running = false;
+                        Console.WriteLine("Thank you for using BOC Banking Portal!");
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+
+                if (running) Pause();
+            }
+        }
+
+        static void Register()
+        {
+            Console.Write("Enter Username: ");
+            string userName = Console.ReadLine();
+
+            Console.Write("Enter Password: ");
+            string password = Console.ReadLine();
+
+            
+            foreach (var user in users)
+            {
+                if (user.UserName == userName)
+                {
+                    Console.WriteLine("Username already exists. Try another.");
+                    return;
+                }
+            }
+
+            string accountNumber = Guid.NewGuid().ToString().Substring(0, 10);
+            BankAccount newAccount = new BankAccount("BOC", accountNumber, userName, 1000); 
+            User newUser = new User(userName, password, newAccount);
+
+            users.Add(newUser);
+            Console.WriteLine($"Registration successful! Your account number is {accountNumber}");
+        }
+
+        static void Login()
+        {
+            Console.Write("Enter Username: ");
+            string userName = Console.ReadLine();
+
+            Console.Write("Enter Password: ");
+            string password = Console.ReadLine();
+
+            foreach (var user in users)
+            {
+                if (user.UserName == userName && user.Password == password)
+                {
+                    loggedInUser = user;
+                    Console.WriteLine($"Login successful! Welcome {loggedInUser.UserName}");
+                    return;
+                }
+            }
+
+            Console.WriteLine("Login failed. Invalid username or password.");
+        }
+
+        static void AccountMenu()
+        {
+            bool loggedIn = true;
+            while (loggedIn)
+            {
+                Console.Clear();
+                Console.WriteLine("==================================================");
+                Console.WriteLine($" Welcome {loggedInUser.UserName} - BOC Banking Portal");
+                Console.WriteLine("==================================================");
                 Console.WriteLine("1. View Account");
                 Console.WriteLine("2. Check Balance");
                 Console.WriteLine("3. Deposit");
                 Console.WriteLine("4. Withdraw");
                 Console.WriteLine("5. View Transactions");
-                Console.WriteLine("6. Exit");
+                Console.WriteLine("6. Logout");
                 Console.WriteLine("==================================================");
                 Console.Write("Choose an option: ");
 
@@ -134,63 +226,51 @@ namespace BankingApplication
                 switch (choice)
                 {
                     case 1:
-                        myAccount.ShowAccountDetails();
+                        loggedInUser.Account.ShowAccountDetails();
                         break;
-
                     case 2:
-                        Console.WriteLine($"Balance: Rs.{myAccount.Balance:F2}");
+                        Console.WriteLine($"Balance: Rs.{loggedInUser.Account.Balance:F2}");
                         break;
-
                     case 3:
                         Console.Write("Enter deposit amount: ");
                         if (decimal.TryParse(Console.ReadLine(), out decimal deposit))
-                            myAccount.Deposit(deposit);
+                            loggedInUser.Account.Deposit(deposit);
                         else
                             Console.WriteLine("Invalid input.");
                         break;
-
                     case 4:
                         Console.Write("Enter withdrawal amount: ");
                         if (decimal.TryParse(Console.ReadLine(), out decimal withdrawal))
                         {
-                            bool success = myAccount.Withdraw(withdrawal);
+                            bool success = loggedInUser.Account.Withdraw(withdrawal);
                             if (!success)
-                            {
                                 Console.WriteLine("Transaction failed. Please try again.");
-                            }
                         }
                         else
                         {
                             Console.WriteLine("Invalid input.");
                         }
                         break;
-
                     case 5:
-                        myAccount.ShowTransactions();
+                        loggedInUser.Account.ShowTransactions();
                         break;
-
                     case 6:
-                        running = false;
-                        Console.WriteLine("==================================================");
-                        Console.WriteLine(" Thank you for using BOC Banking Portal!");
-                        Console.WriteLine("==================================================");
+                        loggedIn = false;
+                        loggedInUser = null;
+                        Console.WriteLine("Logged out successfully.");
                         break;
-
                     default:
                         Console.WriteLine("Invalid choice. Please try again.");
                         break;
                 }
 
-                if (running)
-                {
-                    Pause();
-                }
+                if (loggedIn) Pause();
             }
         }
 
         static void Pause()
         {
-            Console.WriteLine("\nPress any key to return to the menu...");
+            Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
         }
     }
