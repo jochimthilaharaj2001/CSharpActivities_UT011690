@@ -24,6 +24,10 @@ namespace BankingApplication
 
         public void ShowAccountDetails()
         {
+            Console.Clear();
+            Console.WriteLine("==================================================");
+            Console.WriteLine("                   View Account");
+            Console.WriteLine("==================================================");
             Console.WriteLine($"Bank: {BankName}");
             Console.WriteLine($"Account Holder: {UserName}");
             Console.WriteLine($"Account Number: {AccountNumber}");
@@ -35,11 +39,19 @@ namespace BankingApplication
             if (amount > 0)
             {
                 Balance += amount;
+                Console.Clear();
+                Console.WriteLine("==================================================");
+                Console.WriteLine("                     Deposit");
+                Console.WriteLine("==================================================");
                 Console.WriteLine($"Deposited Rs.{amount:F2}. New Balance: Rs.{Balance:F2}");
                 transactions.Add($"Deposited Rs.{amount:F2} on {DateTime.Now}");
             }
             else
             {
+                Console.Clear();
+                Console.WriteLine("==================================================");
+                Console.WriteLine("                     Deposit");
+                Console.WriteLine("==================================================");
                 Console.WriteLine("Deposit amount must be positive.");
             }
         }
@@ -48,17 +60,29 @@ namespace BankingApplication
         {
             if (amount <= 0)
             {
+                Console.Clear();
+                Console.WriteLine("==================================================");
+                Console.WriteLine("                   Withdrawal");
+                Console.WriteLine("==================================================");
                 Console.WriteLine("Withdrawal amount must be greater than zero.");
                 return false;
             }
             else if (amount > Balance)
             {
+                Console.Clear();
+                Console.WriteLine("==================================================");
+                Console.WriteLine("                   Withdrawal");
+                Console.WriteLine("==================================================");
                 Console.WriteLine($"Insufficient funds! Available balance: Rs.{Balance:F2}");
                 return false;
             }
             else
             {
                 Balance -= amount;
+                Console.Clear();
+                Console.WriteLine("==================================================");
+                Console.WriteLine("                   Withdrawal");
+                Console.WriteLine("==================================================");
                 Console.WriteLine($"Withdrew Rs.{amount:F2}. New Balance: Rs.{Balance:F2}");
                 transactions.Add($"Withdrew Rs.{amount:F2} on {DateTime.Now}");
                 return true;
@@ -67,6 +91,7 @@ namespace BankingApplication
 
         public void ShowTransactions()
         {
+            Console.Clear();
             Console.WriteLine("==================================================");
             Console.WriteLine("              Transaction History");
             Console.WriteLine("==================================================");
@@ -140,7 +165,9 @@ namespace BankingApplication
                         break;
                     case 3:
                         running = false;
+                        Console.Clear();
                         Console.WriteLine("Thank you for using BOC Banking Portal!");
+                        Console.ReadKey();
                         break;
                     default:
                         Console.WriteLine("Invalid choice. Please try again.");
@@ -153,6 +180,10 @@ namespace BankingApplication
 
         static void Register()
         {
+            Console.Clear();
+            Console.WriteLine("==================================================");
+            Console.WriteLine("                      SignUp");
+            Console.WriteLine("==================================================");
             Console.Write("Enter Username: ");
             string userName = Console.ReadLine();
 
@@ -179,6 +210,10 @@ namespace BankingApplication
 
         static void Login()
         {
+            Console.Clear();
+            Console.WriteLine("==================================================");
+            Console.WriteLine("                      Login");
+            Console.WriteLine("==================================================");
             Console.Write("Enter Username: ");
             string userName = Console.ReadLine();
 
@@ -190,6 +225,7 @@ namespace BankingApplication
                 if (user.UserName == userName && user.Password == password)
                 {
                     loggedInUser = user;
+                    Console.Clear();
                     Console.WriteLine($"Login successful! Welcome {loggedInUser.UserName}");
                     return;
                 }
@@ -229,9 +265,17 @@ namespace BankingApplication
                         loggedInUser.Account.ShowAccountDetails();
                         break;
                     case 2:
+                        Console.Clear();
+                        Console.WriteLine("==================================================");
+                        Console.WriteLine("                Account Balance");
+                        Console.WriteLine("==================================================");
                         Console.WriteLine($"Balance: Rs.{loggedInUser.Account.Balance:F2}");
                         break;
                     case 3:
+                        Console.Clear();
+                        Console.WriteLine("==================================================");
+                        Console.WriteLine("                     Deposit");
+                        Console.WriteLine("==================================================");
                         Console.Write("Enter deposit amount: ");
                         if (decimal.TryParse(Console.ReadLine(), out decimal deposit))
                             loggedInUser.Account.Deposit(deposit);
@@ -239,6 +283,10 @@ namespace BankingApplication
                             Console.WriteLine("Invalid input.");
                         break;
                     case 4:
+                        Console.Clear();
+                        Console.WriteLine("==================================================");
+                        Console.WriteLine("                   Withdrawal");
+                        Console.WriteLine("==================================================");
                         Console.Write("Enter withdrawal amount: ");
                         if (decimal.TryParse(Console.ReadLine(), out decimal withdrawal))
                         {
